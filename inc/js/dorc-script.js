@@ -1,120 +1,156 @@
-(function($){    
+(function ($) {
     var old_style;
 
-    $(document).ready(function(){
+    $(document).ready(function () {
 
-        $('.wrap-items .bar a').click(function(){            
+        $('.wrap-items .bar a').click(function () {
             var $addClass = $(this).data('style') == 'grid' ? 'grid' : 'list';
             var $removeClass = $(this).data('style') != 'grid' ? 'grid' : 'list';
 
             $(this).toggleClass('active');
-            $(this).siblings('a').removeClass('active');                        
-            $(this).parents('.wrap-items').addClass($addClass).removeClass($removeClass);            
+            $(this).siblings('a').removeClass('active');
+            $(this).parents('.wrap-items').addClass($addClass).removeClass($removeClass);
 
             d_orc_change_list_style($addClass);
         });
 
-        $('.dorc-product-action .actions .dropdown-toggle').click(function(e){
+        // Add Product
+        $('.dorc-product-form').submit(function (e) {
             e.preventDefault();
-            $(this).siblings('.dropdown-action').toggleClass('open');
-        });
+            var form = new FormData(e.target);
+            form.set('action', 'dorc_add_to_cart');
 
-        $('.dorc-product-action .plus').click(function(e){
-            e.preventDefault();
-             var quant = parseInt($(this).parents('.actions').find('[name=quant]').val());             
-             $(this).parents('.actions').find('[name=quant]').val(quant+1);
-        });
-
-        $('.dorc-product-action .minus').click(function(e){
-             e.preventDefault();
-             var quant = parseInt($(this).parents('.actions').find('[name=quant]').val());
-             if(quant > 1){
-                $(this).parents('.actions').find('[name=quant]').val(quant-1);
-             }
-        });
-
-        $('.dorc-product-action .remove').click(function(e){
-             e.preventDefault();
-             var self = $(this);
-             var data = {
-                'action' : 'dorc_remove_to_cart',
-                'item' : $(this).parents('.actions').find('[name=item]').val()                
-            };
-
-            d_orc_remove_to_cart(data, function(res){
-                var response = JSON.parse(res);
-                var content_message = self.parents('.actions').find('.message');
-                if(content_message.is(':visible')){
-                    content_message.fadeOut();
+            d_orc_submit_form(form, function (res) {
+                try {
+                    var res = JSON.parse(res)
+                } catch (error) {
+                    console.error(error)
                 }
-                content_message.fadeIn('fast', function(){
-                    $(this).html(response.message).delay(1500).fadeOut('fast', function(){
-                        $(this).html('');
-                        if(!response.count){
-                            self.parents('form').find('[type=submit]').attr('disabled','disabled');
-                        }
-                        self.parents('.actions').parent().remove();
-                    });
-                });
+
+                if (res.message) {
+                    alert(res.message);
+                }
+
+                if (res.product_list.variations_html) {
+                    $('#dorc-list-variations-cart').html(res.product_list.variations_html);
+                }
+
+                if (res.product_list.quantity_total) {
+                    $('#quantity-total span').html(res.product_list.quantity_total)
+                }
             });
         });
 
-        $('.dorc-product-action .add').click(function(e){
+        // Alter Quantity Variation Product
+        $('body').on('click', '.dorc-input-quantity', function (e) {
+            $(this).prev('button').fadeIn();
+        })
+
+        $('body').on('click', '.dorc-change-quant-variation', function (e) {
             e.preventDefault();
 
-            $(this).text('Alterar');            
+            var _self = $(this);
+            var input_value = $(this).next('input')
+            input_value.val(input_value.val() < 1 ? 1 : input_value.val());
 
-            var self = $(this);            
             var data = {
-                'action' : 'dorc_add_to_cart',
-                'item' : $(this).parents('.actions').find('[name=item]').val(),
-                'title' : $(this).parents('.actions').find('[name=title]').val(),
-                'quant' : $(this).parents('.actions').find('[name=quant]').val(),
-            };
-            
-            d_orc_add_to_cart(data, function(res){
-                var response = JSON.parse(res);
-                var content_message = self.parents('.actions').find('.message');
-                if(content_message.is(':visible')){
-                    content_message.fadeOut();
-                }
-                content_message.fadeIn('fast', function(){
-                    $(this).html(response.message).delay(3000).fadeOut('fast', function(){
-                        $(this).html('');
-                    });
-                });
-            });
-        });
+                action: 'dorc_change_variation_from_cart',
+                product: $(this).data('prodid'),
+                value: $(this).next('input').val()
+            }
 
-        $('[data-zoom]').each(function(index, ele) {            
+            if (typeof $(this).data('key') != undefined) {
+                data.key = $(this).data('key');
+            }
+
+            d_orc_post_ajax(data, function (res) {
+                try {
+                    var data = JSON.parse(res);
+                } catch (error) {
+                    return false;
+                }
+
+                if ($('#quantity-total span').length) {
+                    $('#quantity-total span').html(data.prod_quantity_total);
+                } else {
+                    _self.parents('.list-group-item').find('.quantity-total').html(data.prod_quantity_total);
+                }
+
+                _self.fadeOut();
+
+            });
+        })
+
+        // Remove Product
+        $('body').on('click', '.dorc-remove-product', function (e) {
+            e.preventDefault();
+            var data = {
+                action: 'dorc_remove_from_cart',
+                product: $(this).data('prodid')
+            }
+
+            if (typeof $(this).data('key') != undefined) {
+                data.key = $(this).data('key');
+            }
+
+            d_orc_post_ajax(data, function (res) {
+                try {
+                    var data = JSON.parse(res);
+                } catch (error) {
+
+                }
+
+                if (data.message) {
+                    alert(data.message);
+                    window.location.reload();
+                }
+
+            });
+        })
+
+        $('[data-zoom]').each(function (index, ele) {
             $(ele).zoom({
                 url: $(ele).data('zoom')
             });
         })
+
+
+        // Init single slide show
+        $('[data-dorc=slick]').slick({
+            dots: true,
+            arrows: false,
+            adaptiveHeight: true,
+        });
     });
 
-    function d_orc_change_list_style(style){
-        if(old_style == style){
+    function d_orc_change_list_style(style) {
+        if (old_style == style) {
             return;
         }
         var data = {
-            'action' : 'dorc_change_list_style',
-            'style' : style
+            'action': 'dorc_change_list_style',
+            'style': style
         }
-        $.post(ajax_object.ajax_url, data, function(response){});
+        $.post(ajax_object.ajax_url, data, function (response) { });
         old_style = style;
     }
 
-    function d_orc_add_to_cart(data, callback){               
-        $.post(ajax_object.ajax_url, data, function(response){
+    function d_orc_submit_form(data, callback) {
+        $.ajax({
+            url: ajax_object.ajax_url,
+            data: data,
+            processData: false,
+            contentType: false,
+            type: 'POST'
+        }).done(function (res) {
+            callback(res)
+        });
+    }
+
+    function d_orc_post_ajax(data, callback) {
+        $.post(ajax_object.ajax_url, data, function (response) {
             callback(response);
         });
-    }   
-    
-    function d_orc_remove_to_cart(data, callback){               
-        $.post(ajax_object.ajax_url, data, function(response){
-            callback(response);
-        });
-    }  
+    }
 
 })(jQuery);

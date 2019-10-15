@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
 *@package Wordpress
 *@subpackage Produtos & Orçamentos
@@ -13,7 +13,7 @@
 function d_orc_register_products_post_type()
 {
     $labels = array(
-        'name' => 'Produtos DO',
+        'name' => 'Produtos',
         'singular_name' => 'Produto',
         'add_new' => 'Adicionar novo',
         'add_new_item' => 'Adicionando novo produto',
@@ -32,19 +32,19 @@ function d_orc_register_products_post_type()
         'menu_position' => 10,
         'menu_icon' => 'dashicons-store',
         'supports' => array('title','editor','thumbnail','revisions'),
-        'has_archive' => true,                
-        'rewrite' => array('slug' => 'produtos/item'),
+        'has_archive' => true,
+        'rewrite' => array('slug' => 'orc/prod'),
         'show_in_nav_menus' => false,
         'hierarchical' => false
-    ) );    
+    ) );
 }
 add_action( 'init', 'd_orc_register_products_post_type');
 
 function d_orc_register_products_taxonomy()
 {
     $labels = array(
-        'name' => 'Categorias Produtos DO',
-        'singular_name' => 'Categoria',        
+        'name' => 'Categorias Produtos',
+        'singular_name' => 'Categoria',
         'menu_name' => 'Categorias',
         'all_items' => 'Todas as categorias',
         'edit_item' => 'Editar categoria',
@@ -57,7 +57,7 @@ function d_orc_register_products_taxonomy()
         'labels' => $labels,
         'hierarchical' => true,
         'show_admin_column' => true,
-        'rewrite' => array('slug' => 'produtos/categoria')
+        'rewrite' => array('slug' => 'orc/categoria')
     ));
 }
 add_action( 'init', 'd_orc_register_products_taxonomy');
@@ -65,8 +65,8 @@ add_action( 'init', 'd_orc_register_products_taxonomy');
 function d_orc_register_orc_post_type()
 {
     $labels = array(
-        'name' => 'Orçamentos DO',
-        'singular_name' => 'Orçamento',                
+        'name' => 'Orçamentos',
+        'singular_name' => 'Orçamento',
         'view_item' => 'Visualizar orçamento',
         'edit_item' => 'Visualizando orçamento',
         'view_items' => 'Visuzalizr orçamentos',
@@ -76,24 +76,24 @@ function d_orc_register_orc_post_type()
     );
 
     register_post_type( 'dorc', array(
-        'labels' => $labels,        
+        'labels' => $labels,
         'public' => true,
         'menu_position' => 10,
         'menu_icon' => 'dashicons-list-view',
-        'supports' => false,       
+        'supports' => false,
         'publicly_queryable' => false,
         'exclude_from_search' => true,
         'show_in_nav_menus' => false,
-        'capabilities' => array(            
-            'edit_post'  => 'edit_dorc',            
+        'capabilities' => array(
+            'edit_post'  => 'edit_dorc',
             'read_post' => 'read_dorc',
-            'delete_post' => 'delete_dorc',            
+            'delete_post' => 'delete_dorc',
             'create_posts' => false,
-            'publish_posts' => false,            
+            'publish_posts' => false,
         ),
         'map_meta_cap' => true,
         'register_meta_box_cb' => 'd_orc_metaboxes_change_dorc'
-    ) );  
+    ) );
 }
 add_action( 'init', 'd_orc_register_orc_post_type' );
 
@@ -114,11 +114,11 @@ add_filter( 'post_row_actions', 'd_orc_manage_edit_from_dorc');
 
 /***** Add collumns in dorc page list*******/
 function d_orc_add_products_columns_dorc($columns)
-{   
+{
     return array(
         'cb' => '<input type="checkbox">',
         'title' => __( 'Title' ),
-        'client_info' => 'Info. Cliente',        
+        'client_info' => 'Info. Cliente',
         'date' => __( 'Date' )
     );
 }
@@ -126,7 +126,7 @@ add_filter( 'manage_dorc_posts_columns', 'd_orc_add_products_columns_dorc' );
 
 function d_orc_add_products_custom_column_dorc($column, $post_id){
 
-    if($column == 'client_info'){    
+    if($column == 'client_info'){
         echo 'Nome: ' . get_post_meta( $post_id, 'dorc_name', true ) . ' <br> ';
         echo 'Email: ' . get_post_meta( $post_id, 'dorc_email', true ) . ' <br> ';
         echo 'Telefone: ' . get_post_meta( $post_id, 'dorc_phone', true );

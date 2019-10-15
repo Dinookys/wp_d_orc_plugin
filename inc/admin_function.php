@@ -9,7 +9,7 @@
 *************************/
 function dorc_add_admin_page(){
     //add_submenu_page( parent_slug, page_title, menu_title, capability, menu_slug, function ) 
-    add_submenu_page('plugins.php', 'Configurações Plugin Orçamentos DO', 'Config. Orc DO', 'manage_options', 'dorc_plugin_config', 'dorc_create_admin_page');
+    add_submenu_page('plugins.php', 'Configurações Plugin Orçamentos DO', 'Config. Orçamento', 'manage_options', 'dorc_plugin_config', 'dorc_create_admin_page');
 
     register_setting( 'dorc-settings', 'dorc_google_site_key' );
     register_setting( 'dorc-settings', 'dorc_google_private_key' );
@@ -47,7 +47,17 @@ function dorc_admin_email_callback(){
 
 // Section Form
 function dorc_form_settings_section_callback(){
-    $html = '<input class="regular-text" type="text" value="[dorc-form]" onclick="this.select()" readonly=""/><br><i>Copie o código acima e cole dentro de uma página para gerar o formulário</i>';
+    $html = '<p>';
+    $html .= '<input class="large-text" type="text" value="'. htmlentities2('[dorc-form]') .'" onclick="this.select()" readonly=""/><br><i>Copie o código acima e cole dentro de uma página para gerar o formulário</i>';    
+    $html .= '</p>';
+    $html .= '<p>';
+    $html .= '<input class="large-text" type="text" value="'. htmlentities2('[dorc-list-products cats="1,2,3" posts_per_page="10" order="ASC|DESC|RAND" view="grid|list"]') .'" onclick="this.select()" readonly=""/><br><i>Copie o código acima e cole dentro de uma página para gerar uma lista de produtos basedo no id da categoria.</i>';
+    $html .= '<br><i>Atributos do shortcode: </i>';
+    $html .=  '<br><i><b>posts_per_page</b> = Quantidade de produtos a ser mostrado; deixe <b>-1</b> para listar todos.</i>';
+    $html .=  '<br><i><b>cats</b> = ID das categorias de produtos separados por <b>vírgula (,)</b>. Deixei vazio para listar produtos de todas as categorias.</i>';
+    $html .=  '<br><i><b>order</b> = Ordenação valores: ASC, DESC ou RAND.</i>';
+    $html .=  '<br><i><b>view</b> = Tipo de visualização valores: grid ou list.</i>';
+    $html .= '</p>';
     echo $html;
 }
 

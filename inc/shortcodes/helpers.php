@@ -11,6 +11,8 @@ function dorc_mail_body($args = []){
     $html .= '<p>Nome: ' . $args['name'] . '</p>';
     $html .= '<p>Email: ' . $args['email'] . '</p>';
     $html .= '<p>Telefone: ' . $args['phone'] . '</p>';
+	$html .= '<p>CPF/CNPJ: '. $args['cpf_cnpj'] .'</p>';
+	$html .= '<p>Cidade: ' . $args['city'] . '</p>';
     $html .= '<hr>';
     $html .= '<p><a href="'. $args['post_url'] .'" target="_blank" >Visualizar Pedido</a></p>';
     $html .= '<hr>';

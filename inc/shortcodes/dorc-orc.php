@@ -32,3 +32,55 @@ function dorc_orc_form_shortcode($atts , $content = null){
 }
 
 add_shortcode( 'dorc-form', 'dorc_orc_form_shortcode' );
+
+function dorc_list_products($attrs, $content)
+{
+    $attrs = (object) shortcode_atts(array(
+        'order' => 'ASC',
+        'posts_per_page' => 10,
+        'cats' => '',
+        'view' => 'grid'
+    ), $attrs, 'dorc-list-products');
+
+    $query = new WP_Query(array(
+        'post_type' => 'dorc-products',
+        'posts_per_page' => $attrs->posts_per_page,       
+        'orderby' => $attrs->order == 'RAND' ? strtolower($attrs->order) : array('post_title' => $attrs->order),
+        'tax_query' => array(
+            array(
+                'taxonomy' => 'dorc-product-categories',
+                'field' => 'term_id',
+                'terms' => explode(',', $attrs->cats),
+                'operator' => count(explode(',', $attrs->cats)) <= 1 ? '=' : 'IN'
+            )
+        )
+    ));
+
+    ob_start();
+
+    if($query->have_posts()) {
+
+        echo '<div class="dorc-products-list items '. $attrs->view .'">';
+
+        while( $query->have_posts() ) {
+            $query->the_post();
+
+            $template_theme = get_template_directory() . '/dorc-item-list.php';
+
+            if(file_exists($template_theme)) {
+                require $template_theme;
+            } else {
+                require DORC_DIR_PATH . '/templates/dorc-item-list.php';
+            }
+
+        }
+
+        echo '</div>';
+
+        wp_reset_postdata();
+        wp_reset_query();
+    }
+
+    return ob_get_clean();
+}
+add_shortcode('dorc-list-products', 'dorc_list_products');
