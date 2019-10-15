@@ -4,28 +4,31 @@
 *@subpackage Produtos & Orçamentos
 */
 
-$grid_style = isset($_SESSION['dorc-list-style']) ? $_SESSION['dorc-list-style'] : 'list';
-$btn_grid_active = $grid_style == 'grid' ? 'active' : '';
-$btn_list_active = $grid_style == 'list' ? 'active' : '';
+$grid_style = $_SESSION['dorc-list-style'] ? $_SESSION['dorc-list-style'] : 'list';
+$btn_grid_active = $_SESSION['dorc-list-style'] == 'grid' || !$_SESSION['dorc-list-style'] ? 'active' : '';
+$btn_list_active = $_SESSION['dorc-list-style'] == 'list' ? 'active' : '';
 
-$current_cat = get_term_by( 
-    'slug', 
-    get_query_var( 'term' ), 
-    get_query_var( 'taxonomy' )    
+//ORDER
+global $wp_query;
+$args = array(        
+    'orderby' => 'post_title',
+    'order' => 'ASC'
 );
 
-$pagination = get_the_posts_pagination( array(
-            'screen_reader_text' => ' ',
-            'mid_size' => 2
-        ));
+query_posts(array_merge($wp_query->query, $args));
+
+$pagination = get_the_posts_pagination( 
+    array(
+        'screen_reader_text' => ' ',
+        'mid_size' => 2
+    )
+);
 
 $pagination = strip_tags($pagination,'<a><span><div>');
 
 get_header(); ?>
     <div id="dorc-category" class="container">
-        <h2 class="page-header" >
-            <?php echo $current_cat->name; ?>            
-        </h2>
+        <?php the_archive_title('<h2 class="page-header" >', '</h2>'); ?>
 
     <?php if( has_nav_menu( 'd_orc_menu_sidebar' ) ) : ?>
     <div class="row">            

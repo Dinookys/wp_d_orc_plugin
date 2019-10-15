@@ -3,8 +3,8 @@
  *Plugin Name: Produtos & Orçamentos
  *Author: Media Virtual
  *Author URI: http://mediavirtual.com.br
- *Version: 1.2
- *Description: Um plugin para cadastro de produtos com orçamento, categorias e galeria de fotos.
+ *Version: 1.6
+ *Description: Um plugin para cadastro de produtos para orçamento. Com categorias e galeria de fotos  e com variação de produto.
  *
  */
 if (!session_id()) {
@@ -17,12 +17,16 @@ define('DORC_DIR_PATH', plugin_dir_path(__FILE__));
 define('DORC_DIR_PATH_SHORTCODES', DORC_DIR_PATH . '/inc/shortcodes');
 define('DORC_DIR_URL', plugin_dir_url(__FILE__));
 
+require_once plugin_dir_path(__FILE__) . '/inc/functions.php';
 require_once plugin_dir_path(__FILE__) . '/inc/enqueue.php';
 require_once plugin_dir_path(__FILE__) . '/inc/post_types.php';
 require_once plugin_dir_path(__FILE__) . '/inc/ajax.php';
 
 //ShortCodes
 require_once plugin_dir_path(__FILE__) . '/inc/shortcodes/dorc-orc.php';
+
+//Widgets
+require_once plugin_dir_path(__FILE__) . '/inc/widgets/widgets.php';
 
 if (is_admin()) {
     require_once plugin_dir_path(__FILE__) . '/inc/admin_function.php';
@@ -31,7 +35,6 @@ if (is_admin()) {
 
 if (!is_admin()) {
     require_once plugin_dir_path(__FILE__) . '/inc/add_filter_templates.php';
-    require_once plugin_dir_path(__FILE__) . '/inc/session_manage.php';
 }
 
 function dorc_pagination()
@@ -70,7 +73,10 @@ function d_orc_init()
 add_action('init', 'd_orc_init');
 
 function d_orc_on_activation_hook()
-{
+{  
+    d_orc_register_products_post_type();
+    d_orc_register_products_taxonomy();
+    d_orc_register_orc_post_type();
     flush_rewrite_rules();
 }
 register_activation_hook(__FILE__, 'd_orc_on_activation_hook');
