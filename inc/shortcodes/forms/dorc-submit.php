@@ -1,7 +1,7 @@
 <?php
 /*
     @package dorc
-    @subpackage plugin form newpost
+    @subpackage plugin form
  */
 
 $valid = new validData();
@@ -114,9 +114,9 @@ if (isset($_POST['submit'])
         $sitename = $_SERVER['SERVER_NAME'];
 
         $blog_name = get_option('blogname');
-        $email = 'no-reply@' . substr( $sitename, 4 );
+        $header_email = 'no-reply@' . substr( $sitename, 4 );
 
-        $headers[] = "From: $blog_name <$email>";
+        $headers[] = "From: $blog_name <$header_email>";
         $headers[] = 'Content-Type: text/html; charset=UTF-8';
 
         $subject = 'Novo pedido de orçamento do site: ' . get_site_option('blogname');
